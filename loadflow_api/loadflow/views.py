@@ -1,18 +1,15 @@
-from django.shortcuts import render
+from rest_framework.generics import ListCreateAPIView
+from .models import Bus, Line, Load
+from .serializers import BusSerializer, LineSerializer, LoadSerializer
 
-from rest_framework import generics
-from .models import Bus, Generator, Load
-from .serializers import BusSerializer, GeneratorSerializer, LoadSerializer
-
-class BusListCreate(generics.ListCreateAPIView):
+class BusListView(ListCreateAPIView):
     queryset = Bus.objects.all()
     serializer_class = BusSerializer
 
-class GeneratorListCreate(generics.ListCreateAPIView):
-    queryset = Generator.objects.all()
-    serializer_class = GeneratorSerializer
+class LineListView(ListCreateAPIView):
+    queryset = Line.objects.all()
+    serializer_class = LineSerializer
 
-class LoadListCreate(generics.ListCreateAPIView):
+class LoadListView(ListCreateAPIView):
     queryset = Load.objects.all()
     serializer_class = LoadSerializer
-
