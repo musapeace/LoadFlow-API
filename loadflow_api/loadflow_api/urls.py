@@ -16,7 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from loadflow.views import BusListView, LineListView, LoadListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('buses/', BusListView.as_view(), name='bus-list'),
+    path('lines/', LineListView.as_view(), name='line-list'),
+    path('loads/', LoadListView.as_view(), name='load-list'),
 ]
