@@ -1,14 +1,15 @@
 from rest_framework import serializers
-from .models import Bus, Generator, Load
+from rest_framework import serializers
+from .models import Bus, Line, Load
 
 class BusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bus
         fields = '__all__'
 
-class GeneratorSerializer(serializers.ModelSerializer):
+class LineSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Generator
+        model = Line
         fields = '__all__'
 
 class LoadSerializer(serializers.ModelSerializer):
