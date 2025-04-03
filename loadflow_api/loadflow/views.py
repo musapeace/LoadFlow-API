@@ -44,7 +44,7 @@ class LoadFlowAnalysisView(APIView):
         bus_id_map = {bus.id: idx for idx, bus in enumerate(buses)}
 
         # Map bus loads
-        load_values = {load.bus.id: load.power for load in loads}
+        load_values = {load.bus.id: complex(load.load_real, load.load_imag) for load in loads}
         bus_loads = np.array([load_values.get(bus.id, 0) for bus in buses])
 
         # Extract line impedances (excluding zero-impedance lines)
