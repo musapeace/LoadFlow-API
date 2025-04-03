@@ -16,12 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from loadflow.views import BusListView, LineListView, LoadListView, LoadlowAnalysisView
+from loadflow.views import BusListView, LineListView, LoadListView, LoadFlowAnalysisView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('buses/', BusListView.as_view(), name='bus-list'),
     path('lines/', LineListView.as_view(), name='line-list'),
     path('loads/', LoadListView.as_view(), name='load-list'),
-    path('loadflow/', LoadlowAnalysisView.as_view(), name='loadflow-analysis'),
+    path('loadflow/', LoadFlowAnalysisView.as_view(), name='loadflow-analysis'),
 ]
