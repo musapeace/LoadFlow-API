@@ -27,7 +27,7 @@ class LoadFlowAnalysisView(APIView):
     def get(self, request):
         # Fetch all buses, lines, and loads
         buses = Bus.objects.all()
-        lines = Line.objects.exclude(impedance=0)  # Ignore zero-impedance lines
+        lines = Line.objects.exclude(impedance_real=0, impedance_imag=0)
         loads = Load.objects.all()
 
         # Return error if required data is missing
@@ -48,7 +48,11 @@ class LoadFlowAnalysisView(APIView):
         bus_loads = np.array([load_values.get(bus.id, 0) for bus in buses])
 
         # Extract line impedances (excluding zero-impedance lines)
-        line_impedances = [(bus_id_map[line.from_bus.id], bus_id_map[line.to_bus.id], complex(line.impedance)) for line in lines]
+        line_impedances = [
+            (bus_id_map[line.from_bus.id], bus_id_map[line.to_bus.id], complex(line.impedance_real, line.impedance_imag)) 
+            for line in lines
+        ]
+
 
         
         # Run power flow analysis
