@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from loadflow.views import run_load_flow
 from django.urls import path
 from loadflow.views import BusListView, LineListView, LoadListView, LoadFlowAnalysisView
 
@@ -24,4 +25,5 @@ urlpatterns = [
     path('lines/', LineListView.as_view(), name='line-list'),
     path('loads/', LoadListView.as_view(), name='load-list'),
     path('loadflow/', LoadFlowAnalysisView.as_view(), name='loadflow-analysis'),
+    path('loadflow/', run_load_flow, name='run_load_flow'),
 ]
