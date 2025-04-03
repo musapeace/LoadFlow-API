@@ -35,9 +35,25 @@ class LoadListView(ListCreateAPIView):
 # Load flow calculation API
 class LoadlowAnalysisView(APIView):
     def get(self, request):
-        loads = np.array([10, 5])  # Replace with actual DB values
-        lines = []  # Replace with line impedance data
+        buses = Bus.objects.all()
+        lines = Line.objects.all()
 
-        voltages = calculate_power_flow(loads, lines)
+        if not buses.exists():
+            return Response({"error": "No buses available"}, status=400)
+
+        if not lines.exists():
+            return Response({"error": "No transmission lines available"}, status=400)
+
+        # Extract bus loads
+        loads = np.array([bus.load for bus in buses])  # Replace with actual DB values
+
+        # Extract line impedances and check for zero impedance
+        line_impedances = [line.impedance for line in lines]
+
+        if any(z == 0 for z in line_impedances):
+            return Response({"error": "Transmission line impedance cannot be zero"}, status=400)
+
+        # Call power flow calculation
+        voltages = calculate_power_flow(loads, line_impedances)
 
         return Response({"bus_voltages": voltages.tolist()})
