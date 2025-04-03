@@ -37,12 +37,18 @@ class LoadlowAnalysisView(APIView):
     def get(self, request):
         buses = Bus.objects.all()
         lines = Line.objects.all()
+        loads = Load.objects.all()
 
         if not buses.exists():
             return Response({"error": "No buses available"}, status=400)
 
         if not lines.exists():
             return Response({"error": "No transmission lines available"}, status=400)
+        
+        if not loads.exists():
+            return Response({"error": "No loads available"}, status=400)
+        
+    
 
         # Extract bus loads
         loads = np.array([bus.load for bus in buses])  # Replace with actual DB values
