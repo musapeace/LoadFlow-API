@@ -1,4 +1,4 @@
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import numpy as np
@@ -13,7 +13,16 @@ class BusListView(ListCreateAPIView):
     queryset = Bus.objects.all()
     serializer_class = BusSerializer
 
+class BusDetailView(RetrieveUpdateDestroyAPIView):  # ✅ Allows GET, PUT, PATCH, DELETE
+    queryset = Bus.objects.all()
+    serializer_class = BusSerializer
+    
+
 class LineListView(ListCreateAPIView):
+    queryset = Line.objects.all()
+    serializer_class = LineSerializer
+
+class LineDetailView(RetrieveUpdateDestroyAPIView):  # ✅ Allows GET, PUT, PATCH, DELETE
     queryset = Line.objects.all()
     serializer_class = LineSerializer
 
@@ -21,6 +30,9 @@ class LoadListView(ListCreateAPIView):
     queryset = Load.objects.all()
     serializer_class = LoadSerializer
 
+class LoadDetailView(RetrieveUpdateDestroyAPIView):  # ✅ Allows GET, PUT, PATCH, DELETE
+    queryset = Load.objects.all()
+    serializer_class = LoadSerializer
 
 # Load flow calculation API
 class LoadFlowAnalysisView(APIView):
