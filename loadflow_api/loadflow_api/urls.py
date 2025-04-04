@@ -28,5 +28,5 @@ urlpatterns = [
     path('loads/', LoadListView.as_view(), name='load-list'),
     path('loads/<int:pk>/', LoadDetailView.as_view(), name='load-detail'),
     path('loadflow/', LoadFlowAnalysisView.as_view(), name='loadflow-analysis'),
-    path('loadflow/', run_load_flow, name='run-load-flow'),
+    path('loadflow/run/', run_load_flow, name='run-load-flow'),
 ]
