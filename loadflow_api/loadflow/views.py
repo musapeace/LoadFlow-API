@@ -43,13 +43,13 @@ class LoadFlowAnalysisView(APIView):
         loads = list(Load.objects.all())
 
         # Return error if required data is missing
-        if not buses.exists():
+        if not buses:
             return Response({"error": "No buses available"}, status=400)
 
-        if not lines.exists():
+        if not lines:
             return Response({"error": "No valid transmission lines available"}, status=400)
 
-        if not loads.exists():
+        if not loads:
             return Response({"error": "No loads available"}, status=400)
         
         num_buses = len(buses)
