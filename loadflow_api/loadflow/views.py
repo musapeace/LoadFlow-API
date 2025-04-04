@@ -38,9 +38,9 @@ class LoadDetailView(RetrieveUpdateDestroyAPIView):  # ✅ Allows GET, PUT, PATC
 class LoadFlowAnalysisView(APIView):
     def get(self, request):
         # Fetch all buses, lines, and loads
-        buses = Bus.objects.all()
-        lines = Line.objects.exclude(impedance_real=0, impedance_imag=0)
-        loads = Load.objects.all()
+        buses = list(Bus.objects.all())
+        lines = list(Line.objects.exclude(impedance_real=0, impedance_imag=0))
+        loads = list(Load.objects.all())
 
         # Return error if required data is missing
         if not buses.exists():
@@ -52,13 +52,15 @@ class LoadFlowAnalysisView(APIView):
         if not loads.exists():
             return Response({"error": "No loads available"}, status=400)
         
-        # Map bus IDs to their voltage levels
+        num_buses = len(buses)
         bus_id_map = {bus.id: idx for idx, bus in enumerate(buses)}
 
         # Map bus loads
-        load_values = {load.bus.id: complex(load.load_real, load.load_imag) for load in loads}
-        bus_loads = np.array([load_values.get(bus.id, 0) for bus in buses])
-
+        bus_loads = np.zeros(num_buses, dtype=complex)
+        for load in loads:
+            if load.bus.id in bus_id_map:
+                idx = bus_id_map[load.bus.id]
+                bus_loads[idx] += complex(load.load_real, load.load_imag)
         # Extract line impedances (excluding zero-impedance lines)
         line_impedances = [
             (bus_id_map[line.from_bus.id], bus_id_map[line.to_bus.id], complex(line.impedance_real, line.impedance_imag)) 
@@ -89,27 +91,24 @@ def run_load_flow(request):
 
     # Create Y-Bus Matrix
     Y_bus = np.zeros((num_buses, num_buses), dtype=complex)
-
     for line in lines:
-        i = bus_id_map[line.from_bus.id]
-        j = bus_id_map[line.to_bus.id]
-        impedance = complex(line.impedance_real, line.impedance_imag)  
-        
-        if impedance == 0:
-            continue
-
-        admittance = 1 / impedance
-        Y_bus[i, i] += admittance
-        Y_bus[j, j] += admittance
-        Y_bus[i, j] -= admittance
-        Y_bus[j, i] -= admittance
-
+            if line.from_bus.id in bus_id_map and line.to_bus.id in bus_id_map:
+                i, j = bus_id_map[line.from_bus.id], bus_id_map[line.to_bus.id]
+                impedance = complex(line.impedance_real, line.impedance_imag)
+                admittance = 1 / impedance
+                Y_bus[i, i] += admittance
+                Y_bus[j, j] += admittance
+                Y_bus[i, j] -= admittance
+                Y_bus[j, i] -= admittance
     # Check for singular matrix before solving
     if np.linalg.matrix_rank(Y_bus) < num_buses:
-        return JsonResponse({"error": "Load flow calculation failed: Matrix is singular, check bus connections."})
+        return Response({"error": "Y-Bus matrix is singular."}, status=400)
 
+    try:
+            voltages = np.linalg.solve(Y_bus, num_buses)
+    except np.linalg.LinAlgError:
+            return Response({"error": "Numerical issue: Cannot solve system."}, status=500)
 
-    # Solve for voltages (simple test case)
-    voltages = np.linalg.solve(Y_bus, np.ones(num_buses))  # Adjust for actual power injections
+    return JsonResponse({f"bus_{buses[idx].id}_voltage": abs(voltages[idx]) for idx in range(num_buses)})
 
-    return JsonResponse({f"bus_{i+1}_voltage": abs(v) for i, v in enumerate(voltages)})
+        
