@@ -102,12 +102,12 @@ def run_load_flow(request):
                 Y_bus[j, i] -= admittance
     # Check for singular matrix before solving
     if np.linalg.matrix_rank(Y_bus) < num_buses:
-        return Response({"error": "Y-Bus matrix is singular."}, status=400)
+        return JsonResponse({"error": "Y-Bus matrix is singular."}, status=400)
 
     try:
             voltages = np.linalg.solve(Y_bus, num_buses)
     except np.linalg.LinAlgError:
-            return Response({"error": "Numerical issue: Cannot solve system."}, status=500)
+            return JsonResponse({"error": "Numerical issue: Cannot solve system."}, status=500)
 
     return JsonResponse({f"bus_{buses[idx].id}_voltage": abs(voltages[idx]) for idx in range(num_buses)})
 
