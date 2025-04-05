@@ -75,7 +75,7 @@ class LoadFlowAnalysisView(APIView):
         except Exception as e:
             return Response({"error": f"Load flow calculation failed: {str(e)}"}, status=500)
 
-        return Response({"bus_voltages": list(voltages.values())})
+        return Response({"bus_voltages": [str(v) for v in voltages.values()]})
     
 # Load flow calculation function
 def run_load_flow(request):
@@ -105,7 +105,8 @@ def run_load_flow(request):
         return JsonResponse({"error": "Y-Bus matrix is singular."}, status=400)
 
     try:
-            voltages = np.linalg.solve(Y_bus, num_buses)
+            I = np.zeros(num_buses, dtype=complex)
+            voltages = np.linalg.solve(Y_bus, I)
     except np.linalg.LinAlgError:
             return JsonResponse({"error": "Numerical issue: Cannot solve system."}, status=500)
 
