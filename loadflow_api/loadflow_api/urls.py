@@ -16,7 +16,6 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from loadflow.views import run_load_flow
 from loadflow.views import BusListView, LineListView, LoadListView, LoadFlowAnalysisView, BusDetailView, LineDetailView, LoadDetailView
 
 urlpatterns = [
@@ -28,5 +27,4 @@ urlpatterns = [
     path('loads/', LoadListView.as_view(), name='load-list'),
     path('loads/<int:pk>/', LoadDetailView.as_view(), name='load-detail'),
     path('loadflow/', LoadFlowAnalysisView.as_view(), name='loadflow-analysis'),
-    path('loadflow/run/', run_load_flow, name='run-load-flow'),
 ]
