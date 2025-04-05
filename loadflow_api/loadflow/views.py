@@ -75,41 +75,10 @@ class LoadFlowAnalysisView(APIView):
         except Exception as e:
             return Response({"error": f"Load flow calculation failed: {str(e)}"}, status=500)
 
-        return Response({"bus_voltages": [str(v) for v in voltages.values()]})
+        return Response({"bus_voltages":  {
+                f"bus_{buses[i].id}": str(voltages[i]) for i in range(num_buses)
+            }
+        })
     
-# Load flow calculation function
-def run_load_flow(request):
-    buses = list(Bus.objects.all())
-    lines = list(Line.objects.all())
-
-    num_buses = len(buses)
-    if num_buses < 2:
-        return JsonResponse({"error": "At least two buses are required."})
-    
-    # Create bus ID mapping
-    bus_id_map = {bus.id: idx for idx, bus in enumerate(buses)}    
-
-    # Create Y-Bus Matrix
-    Y_bus = np.zeros((num_buses, num_buses), dtype=complex)
-    for line in lines:
-            if line.from_bus.id in bus_id_map and line.to_bus.id in bus_id_map:
-                i, j = bus_id_map[line.from_bus.id], bus_id_map[line.to_bus.id]
-                impedance = complex(line.impedance_real, line.impedance_imag)
-                admittance = 1 / impedance
-                Y_bus[i, i] += admittance
-                Y_bus[j, j] += admittance
-                Y_bus[i, j] -= admittance
-                Y_bus[j, i] -= admittance
-    # Check for singular matrix before solving
-    if np.linalg.matrix_rank(Y_bus) < num_buses:
-        return JsonResponse({"error": "Y-Bus matrix is singular."}, status=400)
-
-    try:
-            I = np.zeros(num_buses, dtype=complex)
-            voltages = np.linalg.solve(Y_bus, I)
-    except np.linalg.LinAlgError:
-            return JsonResponse({"error": "Numerical issue: Cannot solve system."}, status=500)
-
-    return JsonResponse({f"bus_{buses[idx].id}_voltage": abs(voltages[idx]) for idx in range(num_buses)})
 
         
